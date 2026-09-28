@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.20)
 
 project(freertos_learning C)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # Windows simulator port
 set(FREERTOS_PORT MSVC_MINGW CACHE STRING "" FORCE)
 
@@ -21,7 +23,7 @@ target_compile_definitions(freertos_config
 # FreeRTOS Kernel
 add_subdirectory(FreeRTOS-Kernel)
 
-# Our application
+# Application
 add_executable(freertos_learning
     src/main.c
     FreeRTOS-Kernel/portable/MemMang/heap_4.c

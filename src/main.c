@@ -2,16 +2,22 @@
 
 #include "FreeRTOS.h"
 #include "task.h"
+#include "queue.h"
 
+static QueueHandle_t sensor_queue;
 
 /* Task 1 */
 static void sensor_task(void *pvParameters)
 {
     (void) pvParameters;
 
+    int sensor_value=0;
+
     while (1)
     {
-        printf("Sensor task running\n");
+        sensor_value++;
+
+        xQueueSend(sensor_queue,&sensor_value,portMAX_DELAY);
 
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
@@ -23,11 +29,15 @@ static void processing_task(void *pvParameters)
 {
     (void) pvParameters;
 
+    int received_value;
+
     while (1)
     {
-        printf("Processing task running\n");
+        
+        xQueueReceive(sensor_queue,&received_value,portMAX_DELAY);
+        
+        printf("Processing received: %d\n", received_value);
 
-        vTaskDelay(pdMS_TO_TICKS(2000));
     }
 }
 
@@ -35,6 +45,13 @@ static void processing_task(void *pvParameters)
 int main(void)
 {
     printf("Starting FreeRTOS...\n");
+    
+    sensor_queue = xQueueCreate(5,sizeof(int));
+
+    if(sensor_queue == NULL){
+        printf("Failed to Create Queue\n");
+        return 1;
+    }
 
     xTaskCreate(
         sensor_task,
@@ -56,6 +73,6 @@ int main(void)
 
     vTaskStartScheduler();
 
-    /* We should never reach here. */
+    /* Never reach here. */
     return 0;
 }
